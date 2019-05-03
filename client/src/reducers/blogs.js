@@ -5,12 +5,12 @@ const ADD_BLOG = "ADD_BLOG";
 const UPDATE_BLOG = "UPDATE_BLOG";
 const DELETE_BLOG = "DELETE_BLOG";
 
-//REDUX ACTIONS
-export const getBlogs = () => {
+export const getBlogs = cb => {
   return dispatch => {
     axios
       .get("/api/blogs")
-      .then(res => dispatch({ type: BLOGS, blogs: res.data }));
+      .then(res => dispatch({ type: BLOGS, blogs: res.data }))
+      .then(cb());
   };
 };
 
@@ -34,11 +34,9 @@ export const deleteBlog = id => {
   return dispatch => {
     axios
       .delete(`/api/blogs/${id}`)
-      .then(() => dispatch({ type: DELETE_BLOG, id }));
+      .then(res => dispatch({ type: DELETE_BLOG, id }));
   };
 };
-
-//REDUX REDUCER
 
 export default (state = [], action) => {
   switch (action.type) {
@@ -47,12 +45,12 @@ export default (state = [], action) => {
     case ADD_BLOG:
       return [action.blog, ...state];
     case UPDATE_BLOG:
-      return state.map(b => {
-        if (b.id === action.blog.id) return action.blog;
-        return b;
+      return state.map(blog => {
+        if (blog.id === action.blog.id) return action.blog;
+        return blog;
       });
     case DELETE_BLOG:
-      return state.filter(b => b.id !== action.id);
+      return state.filter(a => a.id !== action.id);
     default:
       return state;
   }

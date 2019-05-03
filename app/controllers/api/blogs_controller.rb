@@ -1,6 +1,13 @@
 class Api::BlogsController < ApplicationController
+  # skip_before_action :verify_authenticity_token
+  before_action :set_blog, only: [:show, :update, :destroy]
+
   def index
-    render json: Blog.all
+    render json: Blog.all.order(created_at: :desc)
+  end
+
+  def show
+    render json: @blog
   end
 
   def create
@@ -8,24 +15,29 @@ class Api::BlogsController < ApplicationController
     if blog.save
       render json: blog
     else
-      render json: {errors: blog.errors}, status: :unprocessable_entity
+      render json: {errors: blog.errors.full_messages.join(",")}, status: 422
     end
   end
 
   def update
-    blog = Blog.find(params[:id])
-    blog.update(complete: !blog.complete)
-    render json: blog
+    if @blog.update(blog_params)
+      render json: @blog
+    else
+      render json: {errors: @blog.errors.full_messages.join(",")}, status: 422
+    end
   end
 
   def destroy
-    Blog.find(params[:id]).destroy
-    render json: {message: "Item deleted"}
+    @blog.destroy
   end
 
   private
 
   def blog_params
-    params.require(:blog).permit(:name, :complete)
+    params.require(:blog).permit(:title, :body, :author, :category, :image_url)
+  end
+
+  def set_blog
+    @blog = Blog.find(params[:id])
   end
 end
